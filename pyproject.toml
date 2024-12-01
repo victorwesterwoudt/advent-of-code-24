@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "Advent of Code 24"
+version = "0.1.0"
+description = ""
+authors = ["Victor Westerwoudt <victor.westerwoudt@clockworks.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.1"
+
+[tool.ruff]
+line-length = 79
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
