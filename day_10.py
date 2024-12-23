@@ -90,8 +90,8 @@ class Day10(Day):
     def part_2(self):
         ans = 0
         memo = {}
-        for trailend in self.trailheads:
-            ans += self.dfs2(*trailend, memo)
+        for trailhead in self.trailheads:
+            ans += self.dfs2(*trailhead, memo)
 
         return ans
 
