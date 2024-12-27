@@ -1,11 +1,9 @@
 import heapq
-import sys
+import time
 from enum import Enum
 from functools import cached_property
 
 from src import Day
-
-sys.setrecursionlimit(10000)
 
 
 class Direction(Enum):
@@ -23,6 +21,9 @@ class Direction(Enum):
         if isinstance(other, Direction):
             return self.name <= other.name
         return NotImplemented
+
+    def __repr__(self):
+        return self.name.lower()
 
 
 class Day16(Day):
@@ -50,17 +51,17 @@ class Day16(Day):
     def end(self) -> tuple[int, int]:
         return self.data[1]
 
-    def solve(self):
-        start_r, start_c, start_d = self.start
-        end_r, end_c = self.end
+    def solve(self, start, end):
+        start_r, start_c, start_d = start
+        end_r, end_c = end
         memo = {}
-        heap = [(0, start_r, start_c, start_d, [])]
+        heap = [(0, start_r, start_c, start_d)]
 
         while heap:
-            cost, r, c, d, path = heapq.heappop(heap)
+            cost, r, c, d = heapq.heappop(heap)
 
             if (r, c) == (end_r, end_c):
-                return cost, path + [(r, c, d)]
+                return cost, d
 
             if (r, c) in memo and cost >= memo[(r, c)][0]:
                 continue
@@ -77,41 +78,55 @@ class Day16(Day):
                         new_cost = cost + 1001
                     heapq.heappush(
                         heap,
-                        (new_cost, nr, nc, direction, path + [(r, c, d)]),
+                        (new_cost, nr, nc, direction),
                     )
 
-        return float("inf"), []
-
-    def part_1(self) -> int:
-        cost, path = self.solve()
-        return cost
+        return float("inf"), None
 
     def print_grid(self, grid):
         return "\n".join(grid)
 
+    def part_1(self) -> int:
+        cost, _ = self.solve(self.start, self.end)
+        return cost
+
     def part_2(self) -> int:
-        pass
+        min_cost, _ = self.solve(self.start, self.end)
+
+        # visited = set([(r, c) for r, c, d in path])
+        perc_done = 0
+        ans = 1
+        for r, row in enumerate(self.grid):
+            for c, cell in enumerate(row):
+                if cell != "#":
+                    c1, d1 = self.solve(self.start, (r, c))
+
+                    if c1 >= min_cost:
+                        continue
+
+                    c2, _ = self.solve((r, c, d1), self.end)
+
+                    if c1 + c2 == min_cost:
+                        ans += 1
+
+                perc_done += 1
+                if perc_done % 100 == 0:
+                    print(
+                        f"{perc_done / (len(self.grid) * len(self.grid[0])) * 100:.2f}% done"
+                    )
+
+        return ans
 
 
 if __name__ == "__main__":
     day = Day16("./input/day_16.txt")
+
+    start_time = time.time()
     p1 = day.part_1()
-    print(p1)
-    # for route in p1[1]:
-    #     for tile in route:
-    #         tiles.add(tile)
-    # print(len(tiles))
+    end_time = time.time()
 
+    p2 = day.part_2()
 
-# path finding:
-# the input of the pathfinding function is:
-# - the my current location
-# - the cost of reaching this location
-# - the direcition I\m facing
-# - the end location
-# - a list (memo) of visited locations and the cost of reaching them
-
-# if my location is the end location, I return the cost of reaching this location
-# if else my location is in the memo, and the cost of reaching this location is less than the cost in the memo, I update the memo
-# I then try to move in all directions and for each direction add the cost of moving in that direction to the cost of reaching the current location
-# I then recursively call the function with the new location, the new cost, the new direction, the end location, and the memo
+    print(f"Part 1 result: {p1}")
+    print(f"Part 2 result: {p2}")
+    print(f"Time taken: {end_time - start_time:.2f}s")
