@@ -50,46 +50,17 @@ class Day16(Day):
     def end(self) -> tuple[int, int]:
         return self.data[1]
 
-    # def solve(self, r, c, d, cost, end, memo):
-    #     if (r, c) == end:
-    #         return cost
-
-    #     if (r, c) in memo and cost >= memo[(r, c)][0]:
-    #         return float("inf")
-
-    #     memo[(r, c)] = (cost, d)
-
-    #     min_cost = float("inf")
-    #     for direction in Direction:
-    #         dr, dc = direction.value
-    #         nr, nc = r + dr, c + dc
-    #         if (
-    #             0 <= nr < len(self.grid)
-    #             and 0 <= nc < len(self.grid[0])
-    #             and self.grid[nr][nc] != "#"
-    #         ):
-    #             if direction == d:
-    #                 new_cost = cost + 1
-    #             else:
-    #                 new_cost = cost + 1001
-    #             min_cost = min(
-    #                 min_cost,
-    #                 self.solve(nr, nc, direction, new_cost, end, memo),
-    #             )
-
-    #     return min_cost
-
     def solve(self):
         start_r, start_c, start_d = self.start
         end_r, end_c = self.end
         memo = {}
-        heap = [(0, start_r, start_c, start_d)]
+        heap = [(0, start_r, start_c, start_d, [])]
 
         while heap:
-            cost, r, c, d = heapq.heappop(heap)
+            cost, r, c, d, path = heapq.heappop(heap)
 
             if (r, c) == (end_r, end_c):
-                return cost
+                return cost, path + [(r, c, d)]
 
             if (r, c) in memo and cost >= memo[(r, c)][0]:
                 continue
@@ -106,13 +77,14 @@ class Day16(Day):
                         new_cost = cost + 1001
                     heapq.heappush(
                         heap,
-                        (new_cost, nr, nc, direction),
+                        (new_cost, nr, nc, direction, path + [(r, c, d)]),
                     )
 
         return float("inf"), []
 
     def part_1(self) -> int:
-        return self.solve()
+        cost, path = self.solve()
+        return cost
 
     def print_grid(self, grid):
         return "\n".join(grid)
